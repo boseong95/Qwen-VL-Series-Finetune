@@ -14,6 +14,7 @@ and [Qwen3-VL](https://huggingface.co/Qwen/Qwen3-VL-4B-Thinking) with only using
 
 ## Update
 
+- [2026/03/07] Supports Qwen3-VL classification
 - [2026/03/07] Update codebase to `transformers==5.3.0`
 - [2025/11/28] 🔥**Supports video training with DPO and GRPO.**
 - [2025/11/27] 🔥**Supports Qwen3-VL-MoE**
