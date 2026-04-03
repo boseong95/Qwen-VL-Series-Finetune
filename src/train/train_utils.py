@@ -87,6 +87,244 @@ def compute_vqa_metrics(eval_pred: GenerativeEvalPrediction, rank0_print_fn=prin
     }
 
 
+# ── Surgical VQA Evaluation ──────────────────────────────────────────────────
+
+def _extract_json(text: str):
+    """Extract the first JSON object/array from a string, return parsed dict or None."""
+    import json as _json
+    # Try to find JSON in the text (after optional CoT prefix)
+    for pattern in [r'\{[^{}]*\}', r'\{.*\}', r'\[.*\]']:
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            try:
+                return _json.loads(match.group(0))
+            except _json.JSONDecodeError:
+                continue
+    # Try parsing the whole thing
+    try:
+        return _json.loads(text.strip())
+    except _json.JSONDecodeError:
+        return None
+
+
+def compute_surgical_vqa_metrics(
+    predictions: list[str],
+    references: list[str],
+    sample_ids: list[str] | None = None,
+    answer_formats: list[str] | None = None,
+) -> dict:
+    """Compute per-key metrics for surgical VQA evaluation.
+
+    Returns a dict with:
+      - Overall: json_parse_rate, exact_match, token_f1
+      - Per-key accuracy for JSON keys (phase, success, progress, etc.)
+      - Per-category aggregate scores
+      - Per-sample details for debugging
+
+    Args:
+        predictions: model output strings
+        references: ground truth strings
+        sample_ids: optional sample IDs for reporting
+        answer_formats: optional per-sample format ("json", "nl", "single")
+    """
+    import json as _json
+    n = len(predictions)
+    if sample_ids is None:
+        sample_ids = [f"sample_{i}" for i in range(n)]
+    if answer_formats is None:
+        answer_formats = ["unknown"] * n
+
+    # ── Per-sample results ────────────────────────────────────────────────
+    per_sample = []
+
+    # ── Aggregate counters ────────────────────────────────────────────────
+    # Per-key: {key: {"correct": int, "total": int, "errors": list}}
+    key_metrics = {}
+    # Per-format: {fmt: {"correct": int, "total": int}}
+    format_metrics = {"json": {"correct": 0, "total": 0},
+                      "nl": {"correct": 0, "total": 0},
+                      "single": {"correct": 0, "total": 0}}
+    # JSON parse tracking
+    json_parse_ok = 0
+    json_parse_total = 0
+
+    # Category grouping for keys
+    CATEGORY_MAP = {
+        "phase": "phase_recognition",
+        "current_phase": "phase_recognition",
+        "phase_index": "phase_recognition",
+        "failed_phase": "phase_recognition",
+        "progress": "progress_estimation",
+        "stage": "progress_estimation",
+        "next_phase": "temporal_reasoning",
+        "previous_phase": "temporal_reasoning",
+        "is_transitioning": "temporal_reasoning",
+        "success": "success_failure",
+        "failure_reason": "success_failure",
+        "was_retried": "retry_detection",
+        "retry_successful": "retry_detection",
+        "total_phases": "procedural_ordering",
+        "phases_remaining": "procedural_ordering",
+    }
+
+    def _key_match(pred_val, ref_val, key_name: str) -> bool:
+        """Compare a predicted value to reference for a given key."""
+        if ref_val is None:
+            return pred_val is None
+        if isinstance(ref_val, bool):
+            if isinstance(pred_val, bool):
+                return pred_val == ref_val
+            # Handle string "true"/"false"
+            if isinstance(pred_val, str):
+                return pred_val.lower().strip() == str(ref_val).lower()
+            return False
+        if isinstance(ref_val, (int, float)):
+            if isinstance(pred_val, (int, float)):
+                # For progress: allow ±10 tolerance
+                if key_name == "progress":
+                    return abs(pred_val - ref_val) <= 10
+                # For indices/counts: exact match
+                return pred_val == ref_val
+            return False
+        if isinstance(ref_val, str):
+            if not isinstance(pred_val, str):
+                return False
+            return _normalize_answer(pred_val) == _normalize_answer(ref_val)
+        if isinstance(ref_val, list):
+            if not isinstance(pred_val, list):
+                return False
+            # For failure lists: compare as sets of (phase, reason) tuples
+            if ref_val and isinstance(ref_val[0], dict):
+                ref_set = {(d.get("phase", ""), d.get("failure_reason", "")) for d in ref_val}
+                pred_set = {(d.get("phase", ""), d.get("failure_reason", "")) for d in pred_val if isinstance(d, dict)}
+                return ref_set == pred_set
+            return pred_val == ref_val
+        return str(pred_val) == str(ref_val)
+
+    def _update_key(key, pred_val, ref_val, sid):
+        if key not in key_metrics:
+            key_metrics[key] = {"correct": 0, "total": 0, "mae_sum": 0.0, "mae_count": 0, "errors": []}
+        km = key_metrics[key]
+        km["total"] += 1
+        correct = _key_match(pred_val, ref_val, key)
+        if correct:
+            km["correct"] += 1
+        else:
+            km["errors"].append({"id": sid, "pred": pred_val, "ref": ref_val})
+        # MAE for numeric keys
+        if isinstance(ref_val, (int, float)) and isinstance(pred_val, (int, float)):
+            km["mae_sum"] += abs(pred_val - ref_val)
+            km["mae_count"] += 1
+        return correct
+
+    # ── Evaluate each sample ──────────────────────────────────────────────
+    for i in range(n):
+        pred, ref, sid, fmt = predictions[i], references[i], sample_ids[i], answer_formats[i]
+        sample_result = {"id": sid, "format": fmt, "correct_keys": {}, "parse_ok": True}
+
+        if fmt == "json":
+            json_parse_total += 1
+            pred_json = _extract_json(pred)
+            ref_json = _extract_json(ref)
+
+            if pred_json is None:
+                sample_result["parse_ok"] = False
+                # Still count all ref keys as missed
+                if ref_json and isinstance(ref_json, dict):
+                    for k in ref_json:
+                        _update_key(k, None, ref_json[k], sid)
+                        sample_result["correct_keys"][k] = False
+            else:
+                json_parse_ok += 1
+                # Compare each key
+                if isinstance(ref_json, dict):
+                    all_correct = True
+                    for k, ref_v in ref_json.items():
+                        pred_v = pred_json.get(k) if isinstance(pred_json, dict) else None
+                        correct = _update_key(k, pred_v, ref_v, sid)
+                        sample_result["correct_keys"][k] = correct
+                        if not correct:
+                            all_correct = False
+
+            # Format-level tracking
+            fmt_correct = sample_result["parse_ok"] and all(sample_result["correct_keys"].values())
+            format_metrics["json"]["total"] += 1
+            if fmt_correct:
+                format_metrics["json"]["correct"] += 1
+
+        elif fmt == "single":
+            format_metrics["single"]["total"] += 1
+            if _normalize_answer(pred) == _normalize_answer(ref):
+                format_metrics["single"]["correct"] += 1
+                sample_result["correct_keys"]["exact"] = True
+            else:
+                sample_result["correct_keys"]["exact"] = False
+
+        elif fmt == "nl":
+            format_metrics["nl"]["total"] += 1
+            # Token F1 for NL
+            pred_tokens = _normalize_answer(pred).split()
+            ref_tokens = _normalize_answer(ref).split()
+            common = set(pred_tokens) & set(ref_tokens)
+            if common:
+                prec = len(common) / len(pred_tokens) if pred_tokens else 0
+                rec = len(common) / len(ref_tokens) if ref_tokens else 0
+                f1 = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0
+            else:
+                f1 = 0.0
+            sample_result["token_f1"] = f1
+            format_metrics["nl"]["correct"] += int(f1 > 0.5)
+
+        per_sample.append(sample_result)
+
+    # ── Aggregate results ─────────────────────────────────────────────────
+    results = {
+        "n_samples": n,
+        "json_parse_rate": json_parse_ok / json_parse_total if json_parse_total > 0 else None,
+    }
+
+    # Per-format accuracy
+    for fmt, fm in format_metrics.items():
+        if fm["total"] > 0:
+            results[f"{fmt}_accuracy"] = fm["correct"] / fm["total"]
+            results[f"{fmt}_count"] = fm["total"]
+
+    # Per-key accuracy
+    results["per_key"] = {}
+    for key, km in sorted(key_metrics.items()):
+        entry = {
+            "accuracy": km["correct"] / km["total"] if km["total"] > 0 else None,
+            "correct": km["correct"],
+            "total": km["total"],
+        }
+        if km["mae_count"] > 0:
+            entry["mae"] = km["mae_sum"] / km["mae_count"]
+        if km["errors"]:
+            entry["errors"] = km["errors"][:3]  # first 3 errors for debugging
+        results["per_key"][key] = entry
+
+    # Per-category accuracy
+    cat_scores = {}
+    for key, km in key_metrics.items():
+        cat = CATEGORY_MAP.get(key, "other")
+        if cat not in cat_scores:
+            cat_scores[cat] = {"correct": 0, "total": 0}
+        cat_scores[cat]["correct"] += km["correct"]
+        cat_scores[cat]["total"] += km["total"]
+
+    results["per_category"] = {}
+    for cat, cs in sorted(cat_scores.items()):
+        results["per_category"][cat] = {
+            "accuracy": cs["correct"] / cs["total"] if cs["total"] > 0 else None,
+            "correct": cs["correct"],
+            "total": cs["total"],
+        }
+
+    results["per_sample"] = per_sample
+
+    return results
+
+
 def maybe_zero_3(param, ignore_status=False, name=None, device=torch.device('cpu')):
     from deepspeed import zero
     from deepspeed.runtime.zero.partition_parameters import ZeroParamStatus
