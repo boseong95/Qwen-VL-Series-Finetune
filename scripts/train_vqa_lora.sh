@@ -2,15 +2,13 @@
 # ============================================================================
 # Train Qwen3-VL-8B on image VQA with LoRA (single GPU)
 #
-# Dataset: LLaVA-Instruct-150K subset (COCO images)
+# Dataset: LLaVA-Instruct-150K (156K train / 100 eval, COCO images)
 # GPU:     ~33 GB VRAM at bs=1 (fits on 48GB+ GPU)
-#
-# Prepare data first:
-#   python setup_vqa_data.py --num_image_samples 1000 --skip_video
 # ============================================================================
 
 MODEL_NAME="/home/ubuntu/models/Qwen3-VL-8B-Instruct"
-DATA_PATH="vqa_data/llava_instruct_subset.json"
+DATA_PATH="vqa_data/llava_instruct_train.json"
+EVAL_PATH="vqa_data/llava_instruct_eval.json"
 IMAGE_FOLDER="vqa_data/images"
 OUTPUT_DIR="output/vqa_lora"
 
@@ -34,7 +32,9 @@ deepspeed --num_gpus=1 src/train/train_sft.py \
     --deepspeed scripts/zero2.json \
     --model_id $MODEL_NAME \
     --data_path $DATA_PATH \
+    --eval_path $EVAL_PATH \
     --image_folder $IMAGE_FOLDER \
+    --eval_image_folder $IMAGE_FOLDER \
     --remove_unused_columns False \
     --freeze_vision_tower False \
     --freeze_llm True \
@@ -58,8 +58,16 @@ deepspeed --num_gpus=1 src/train/train_sft.py \
     --tf32 True \
     --gradient_checkpointing True \
     --report_to tensorboard \
+    --logging_dir $OUTPUT_DIR/tb_logs \
     --lazy_preprocess True \
     --save_strategy "steps" \
-    --save_steps 200 \
+    --save_steps 500 \
     --save_total_limit 3 \
-    --dataloader_num_workers 4
+    --dataloader_num_workers 4 \
+    --eval_strategy "steps" \
+    --eval_steps 500 \
+    --per_device_eval_batch_size 1 \
+    --generation_max_new_tokens 256 \
+    --metric_for_best_model "eval_token_f1" \
+    --greater_is_better True \
+    --load_best_model_at_end True

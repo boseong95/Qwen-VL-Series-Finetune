@@ -4,17 +4,18 @@ from peft import LoraConfig, get_peft_model
 import ast
 from transformers import (
     AutoProcessor,
-    BitsAndBytesConfig, 
-    HfArgumentParser, 
+    BitsAndBytesConfig,
+    HfArgumentParser,
 )
 from model.load_model import get_qwen_vl_generation_backbone, load_qwen_vl_generation_model
 from trainer import QwenSFTTrainer
 from dataset import make_supervised_data_module
 from params import DataArguments, ModelArguments, TrainingArguments
-from train.train_utils import get_peft_state_maybe_zero_3, get_peft_state_non_lora_maybe_zero_3, safe_save_model_for_hf_trainer
+from train.train_utils import get_peft_state_maybe_zero_3, get_peft_state_non_lora_maybe_zero_3, safe_save_model_for_hf_trainer, compute_vqa_metrics
 import pathlib
 
 local_rank = None
+
 
 def rank0_print(*args):
     if local_rank == 0 or local_rank == '0' or local_rank is None:
@@ -222,6 +223,7 @@ def train():
         model=model,
         processing_class=processor,
         args=training_args,
+        compute_metrics=lambda eval_pred: compute_vqa_metrics(eval_pred, rank0_print_fn=rank0_print),
         **data_module
     )
 
