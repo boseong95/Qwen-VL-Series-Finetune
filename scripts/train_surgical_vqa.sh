@@ -16,8 +16,8 @@ CHOLEC_RATIO=${CHOLEC_RATIO:-0.25}
 MIX_TOTAL=${MIX_TOTAL:-0}  # 0 = auto (use all data proportionally)
 
 # ── Training hyperparams (override via env vars) ──────────────────────────────
-BATCH_SIZE=${BATCH_SIZE:-2}
-GRAD_ACCUM=${GRAD_ACCUM:-4}
+BATCH_SIZE=${BATCH_SIZE:-1}
+GRAD_ACCUM=${GRAD_ACCUM:-8}
 NUM_EPOCHS=${NUM_EPOCHS:-1}
 LR=${LR:-1e-4}
 MAX_STEPS=${MAX_STEPS:-0}  # 0 = use epochs
@@ -81,9 +81,9 @@ deepspeed --num_gpus=1 src/train/train_sft.py \
     --gradient_accumulation_steps $GRAD_ACCUM \
     --image_min_pixels $((256 * 32 * 32)) \
     --image_max_pixels $((512 * 32 * 32)) \
-    --video_min_pixels $((128 * 32 * 32)) \
-    --video_max_pixels $((256 * 32 * 32)) \
-    --fps 2 \
+    --video_min_pixels $((64 * 32 * 32)) \
+    --video_max_pixels $((128 * 32 * 32)) \
+    --fps 1 \
     --learning_rate $LR \
     --weight_decay 0.1 \
     --warmup_ratio 0.03 \
@@ -98,11 +98,7 @@ deepspeed --num_gpus=1 src/train/train_sft.py \
     --save_steps $SAVE_STEPS \
     --save_total_limit 3 \
     --dataloader_num_workers 4 \
-    --eval_strategy "steps" \
-    --eval_steps $EVAL_STEPS \
+    --eval_strategy "no" \
     --per_device_eval_batch_size 1 \
     --generation_max_new_tokens 256 \
-    --metric_for_best_model "eval_token_f1" \
-    --greater_is_better True \
-    --load_best_model_at_end True \
     $TRAIN_ARGS
