@@ -76,7 +76,8 @@ def run_inference(model, processor, sample, fps=1, max_frames=16,
 
     input_len = inputs["input_ids"].shape[1]
     output_ids = generated_ids[:, input_len:]
-    return processor.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+    output_text = processor.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+    return output_text, frames  # return frames for visualization
 
 
 # ── Visualization helpers ─────────────────────────────────────────────────────
@@ -224,6 +225,7 @@ def main():
     print(f"\nRunning inference on {len(val_data)} val samples...")
 
     predictions, references, sample_ids, answer_formats = [], [], [], []
+    input_frames_cache = {}  # sid -> list of PIL frames (exact model input)
 
     for i, s in enumerate(val_data):
         sid = s["id"]
@@ -236,9 +238,10 @@ def main():
             print("SKIP")
         else:
             try:
-                pred = run_inference(model, processor, s, fps=args.fps,
-                                     max_frames=args.max_frames)
-                print(f"OK ({len(pred)} chars)")
+                pred, frames = run_inference(model, processor, s, fps=args.fps,
+                                             max_frames=args.max_frames)
+                input_frames_cache[sid] = frames
+                print(f"OK ({len(pred)} chars, {len(frames)} frames)")
             except Exception as e:
                 import traceback
                 pred = f"[ERROR: {type(e).__name__}: {e}]"
@@ -280,28 +283,49 @@ def main():
 
     # Visualize JSON predictions
     print(f"\nGenerating visualizations -> {args.viz_dir}/")
+    n_viz = 0
     for i, s in enumerate(val_data):
         sid = s["id"]
         if s.get("answer_format") != "json":
             continue
-        video_path = s.get("video", "")
-        if not os.path.exists(video_path):
+        if sid not in input_frames_cache:
             continue
-        frame = extract_mid_frame(video_path, s.get("video_start", 0), s.get("video_end", 10))
-        if not frame:
-            continue
+
+        frames = input_frames_cache[sid]
+        mid_frame = frames[len(frames) // 2]
+
         correct_keys = None
         for ps in results["per_sample"]:
             if ps["id"] == sid:
                 correct_keys = ps.get("correct_keys", {})
                 break
+
+        # Save prediction card (using mid frame)
         card = make_pred_vs_gt_card(
-            frame, sid, s["conversations"][0]["value"],
+            mid_frame, sid, s["conversations"][0]["value"],
             references[i], predictions[i], "json", correct_keys)
         card.save(os.path.join(args.viz_dir, f"{sid}_pred.png"))
 
-    n_viz = sum(1 for s in val_data if s.get("answer_format") == "json")
-    print(f"Done. {n_viz} prediction cards saved.")
+        # Save input video (the exact frames the model saw)
+        import subprocess
+        frame_tmp = os.path.join(args.viz_dir, f"_tmp_{sid}")
+        os.makedirs(frame_tmp, exist_ok=True)
+        for fi, f in enumerate(frames):
+            f.save(os.path.join(frame_tmp, f"{fi:04d}.png"))
+        subprocess.run([
+            "ffmpeg", "-y", "-framerate", str(max(1, args.fps)),
+            "-i", os.path.join(frame_tmp, "%04d.png"),
+            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-preset", "fast",
+            "-crf", "20", "-loglevel", "error",
+            os.path.join(args.viz_dir, f"{sid}_input.mp4"),
+        ], check=True)
+        for ff in os.listdir(frame_tmp):
+            os.remove(os.path.join(frame_tmp, ff))
+        os.rmdir(frame_tmp)
+
+        n_viz += 1
+
+    print(f"Done. {n_viz} prediction cards + input videos saved.")
 
 
 if __name__ == "__main__":
