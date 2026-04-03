@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import re
 import transformers
 import torch
 import logging
+from typing import TYPE_CHECKING
 
-from trainer.sft_trainer import GenerativeEvalPrediction
+if TYPE_CHECKING:
+    from trainer.sft_trainer import GenerativeEvalPrediction
 
 
 def _normalize_answer(text: str) -> str:
