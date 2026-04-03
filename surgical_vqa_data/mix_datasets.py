@@ -113,6 +113,12 @@ def main():
 
     random.shuffle(mixed)
 
+    # Strip system messages (sft_dataset.py expects alternating human/gpt pairs)
+    for s in mixed:
+        convs = s.get("conversations", [])
+        if convs and convs[0].get("from") == "system":
+            s["conversations"] = convs[1:]
+
     # Resolve relative video paths to absolute
     for s in mixed:
         if "video" in s and not os.path.isabs(s["video"]):
