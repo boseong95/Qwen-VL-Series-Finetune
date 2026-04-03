@@ -112,6 +112,17 @@ def main():
         mixed.extend(sampled)
 
     random.shuffle(mixed)
+
+    # Resolve relative video paths to absolute
+    for s in mixed:
+        if "video" in s and not os.path.isabs(s["video"]):
+            # Relative paths from the generator scripts are relative to BASE_DIR
+            abs_path = os.path.normpath(os.path.join(BASE_DIR, s["video"]))
+            if os.path.exists(abs_path):
+                s["video"] = abs_path
+            else:
+                print(f"  WARNING: video not found: {abs_path}")
+
     print(f"\nFinal mixed dataset: {len(mixed):,} samples")
 
     # Save

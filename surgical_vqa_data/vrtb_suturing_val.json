@@ -2,7 +2,7 @@
   {
     "id": "description_0002027",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260327_minho/videos/chunk-000/laparoscope_camera/episode_000003.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260327_minho/videos/chunk-000/laparoscope_camera/episode_000003.mp4",
     "video_start": 40.1,
     "video_end": 46.95,
     "conversations": [
@@ -23,7 +23,7 @@
   {
     "id": "failure_reason_0006059",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260327_minho/videos/chunk-000/laparoscope_camera/episode_000014.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260327_minho/videos/chunk-000/laparoscope_camera/episode_000014.mp4",
     "video_start": 2.9,
     "video_end": 24.95,
     "conversations": [
@@ -44,7 +44,7 @@
   {
     "id": "prev_phase_0009491",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260327_minho/videos/chunk-000/laparoscope_camera/episode_000022.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260327_minho/videos/chunk-000/laparoscope_camera/episode_000022.mp4",
     "video_start": 48.2,
     "video_end": 51.7,
     "conversations": [
@@ -65,7 +65,7 @@
   {
     "id": "ordering_0009608",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260327_minho/videos/chunk-000/laparoscope_camera/episode_000022.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260327_minho/videos/chunk-000/laparoscope_camera/episode_000022.mp4",
     "video_start": 82.95,
     "video_end": 84.85,
     "conversations": [
@@ -86,7 +86,7 @@
   {
     "id": "phase_id_0017183",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_hyunjun/videos/chunk-000/laparoscope_camera/episode_000009.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_hyunjun/videos/chunk-000/laparoscope_camera/episode_000009.mp4",
     "video_start": 6.5,
     "video_end": 39.7,
     "conversations": [
@@ -107,7 +107,7 @@
   {
     "id": "progress_0021621",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_hyunjun/videos/chunk-000/laparoscope_camera/episode_000020.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_hyunjun/videos/chunk-000/laparoscope_camera/episode_000020.mp4",
     "video_start": 69.25,
     "video_end": 71.25,
     "conversations": [
@@ -128,7 +128,7 @@
   {
     "id": "phase_id_0022785",
     "answer_format": "single",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_hyunjun/videos/chunk-000/laparoscope_camera/episode_000023.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_hyunjun/videos/chunk-000/laparoscope_camera/episode_000023.mp4",
     "video_start": 28.1,
     "video_end": 32.8,
     "conversations": [
@@ -149,7 +149,7 @@
   {
     "id": "completion_0027456",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_hyunjun/videos/chunk-000/laparoscope_camera/episode_000034.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_hyunjun/videos/chunk-000/laparoscope_camera/episode_000034.mp4",
     "video_start": 136.05,
     "video_end": 136.2,
     "conversations": [
@@ -170,7 +170,7 @@
   {
     "id": "success_0029210",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_hyunjun/videos/chunk-000/laparoscope_camera/episode_000040.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_hyunjun/videos/chunk-000/laparoscope_camera/episode_000040.mp4",
     "video_start": 81.7,
     "video_end": 90.55,
     "conversations": [
@@ -191,7 +191,7 @@
   {
     "id": "failure_loc_0032012",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_hyunjun/videos/chunk-000/laparoscope_camera/episode_000047.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_hyunjun/videos/chunk-000/laparoscope_camera/episode_000047.mp4",
     "video_start": 91.75,
     "video_end": 115.45,
     "conversations": [
@@ -212,7 +212,7 @@
   {
     "id": "episode_success_0033907",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000002.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000002.mp4",
     "video_start": 0.0,
     "video_end": 131.4,
     "conversations": [
@@ -233,7 +233,7 @@
   {
     "id": "progress_0036691",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000009.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000009.mp4",
     "video_start": 60.4,
     "video_end": 62.4,
     "conversations": [
@@ -254,7 +254,7 @@
   {
     "id": "success_0037467",
     "answer_format": "single",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000011.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000011.mp4",
     "video_start": 35.8,
     "video_end": 46.45,
     "conversations": [
@@ -275,7 +275,7 @@
   {
     "id": "description_0039301",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000015.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000015.mp4",
     "video_start": 4.4,
     "video_end": 18.7,
     "conversations": [
@@ -296,7 +296,7 @@
   {
     "id": "ordering_0041437",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000020.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000020.mp4",
     "video_start": 4.65,
     "video_end": 24.5,
     "conversations": [
@@ -317,7 +317,7 @@
   {
     "id": "episode_success_0044591",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000026.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000026.mp4",
     "video_start": 0.0,
     "video_end": 103.55,
     "conversations": [
@@ -338,7 +338,7 @@
   {
     "id": "failure_loc_0045928",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000029.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000029.mp4",
     "video_start": 0.0,
     "video_end": 24.05,
     "conversations": [
@@ -359,7 +359,7 @@
   {
     "id": "next_phase_0045939",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000030.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000030.mp4",
     "video_start": 3.9,
     "video_end": 5.2,
     "conversations": [
@@ -380,7 +380,7 @@
   {
     "id": "ordering_0046576",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000031.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260328_seunghoon/videos/chunk-000/laparoscope_camera/episode_000031.mp4",
     "video_start": 51.1,
     "video_end": 54.5,
     "conversations": [
@@ -401,7 +401,7 @@
   {
     "id": "failure_reason_0054540",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000000.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000000.mp4",
     "video_start": 4.7,
     "video_end": 42.35,
     "conversations": [
@@ -422,7 +422,7 @@
   {
     "id": "prev_phase_0056596",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000004.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000004.mp4",
     "video_start": 115.3,
     "video_end": 139.9,
     "conversations": [
@@ -443,7 +443,7 @@
   {
     "id": "episode_success_0059467",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000015.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000015.mp4",
     "video_start": 0.0,
     "video_end": 127.15,
     "conversations": [
@@ -464,7 +464,7 @@
   {
     "id": "description_0060963",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000019.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000019.mp4",
     "video_start": 123.7,
     "video_end": 136.3,
     "conversations": [
@@ -485,7 +485,7 @@
   {
     "id": "arm_id_0062058",
     "answer_format": "single",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000023.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000023.mp4",
     "video_start": 74.5,
     "video_end": 79.0,
     "conversations": [
@@ -506,7 +506,7 @@
   {
     "id": "failure_reason_0065714",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000039.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000039.mp4",
     "video_start": 36.3,
     "video_end": 52.25,
     "conversations": [
@@ -527,7 +527,7 @@
   {
     "id": "success_0066367",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000040.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon/videos/chunk-000/laparoscope_camera/episode_000040.mp4",
     "video_start": 82.2,
     "video_end": 88.4,
     "conversations": [
@@ -548,7 +548,7 @@
   {
     "id": "completion_0069060",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000006.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000006.mp4",
     "video_start": 44.5,
     "video_end": 45.4,
     "conversations": [
@@ -569,7 +569,7 @@
   {
     "id": "completion_0070850",
     "answer_format": "single",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000011.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000011.mp4",
     "video_start": 57.0,
     "video_end": 57.8,
     "conversations": [
@@ -590,7 +590,7 @@
   {
     "id": "arm_id_0072366",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000014.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000014.mp4",
     "video_start": 140.8,
     "video_end": 146.7,
     "conversations": [
@@ -611,7 +611,7 @@
   {
     "id": "next_phase_0073267",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000017.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000017.mp4",
     "video_start": 159.65,
     "video_end": 159.85,
     "conversations": [
@@ -632,7 +632,7 @@
   {
     "id": "completion_0073740",
     "answer_format": "single",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000019.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000019.mp4",
     "video_start": 121.55,
     "video_end": 122.4,
     "conversations": [
@@ -653,7 +653,7 @@
   {
     "id": "failure_reason_0074902",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000024.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000024.mp4",
     "video_start": 66.45,
     "video_end": 74.85,
     "conversations": [
@@ -674,7 +674,7 @@
   {
     "id": "prev_phase_0077230",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000030.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000030.mp4",
     "video_start": 77.5,
     "video_end": 81.45,
     "conversations": [
@@ -695,7 +695,7 @@
   {
     "id": "next_phase_0077583",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000031.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000031.mp4",
     "video_start": 76.7,
     "video_end": 77.95,
     "conversations": [
@@ -716,7 +716,7 @@
   {
     "id": "failure_loc_0078186",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000032.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000032.mp4",
     "video_start": 27.55,
     "video_end": 62.35,
     "conversations": [
@@ -737,7 +737,7 @@
   {
     "id": "next_phase_0084184",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000047.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260329_taeyoon_v2/videos/chunk-000/laparoscope_camera/episode_000047.mp4",
     "video_start": 27.15,
     "video_end": 29.3,
     "conversations": [
@@ -758,7 +758,7 @@
   {
     "id": "arm_id_0084938",
     "answer_format": "single",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000000.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000000.mp4",
     "video_start": 116.9,
     "video_end": 117.45,
     "conversations": [
@@ -779,7 +779,7 @@
   {
     "id": "phase_id_0087541",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000007.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000007.mp4",
     "video_start": 3.55,
     "video_end": 25.2,
     "conversations": [
@@ -800,7 +800,7 @@
   {
     "id": "episode_success_0088854",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000009.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000009.mp4",
     "video_start": 0.0,
     "video_end": 113.85,
     "conversations": [
@@ -821,7 +821,7 @@
   {
     "id": "description_0090414",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000013.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000013.mp4",
     "video_start": 83.95,
     "video_end": 85.1,
     "conversations": [
@@ -842,7 +842,7 @@
   {
     "id": "arm_id_0093244",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000020.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000020.mp4",
     "video_start": 44.6,
     "video_end": 50.7,
     "conversations": [
@@ -863,7 +863,7 @@
   {
     "id": "progress_0095291",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000024.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000024.mp4",
     "video_start": 76.15,
     "video_end": 77.0,
     "conversations": [
@@ -884,7 +884,7 @@
   {
     "id": "ordering_0095297",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000024.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000024.mp4",
     "video_start": 76.15,
     "video_end": 77.0,
     "conversations": [
@@ -905,7 +905,7 @@
   {
     "id": "failure_loc_0097120",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000028.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000028.mp4",
     "video_start": 50.7,
     "video_end": 69.95,
     "conversations": [
@@ -926,7 +926,7 @@
   {
     "id": "progress_0097475",
     "answer_format": "nl",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000029.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000029.mp4",
     "video_start": 94.0,
     "video_end": 96.0,
     "conversations": [
@@ -947,7 +947,7 @@
   {
     "id": "prev_phase_0098312",
     "answer_format": "json",
-    "video": "../../datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000031.mp4",
+    "video": "/home/ubuntu/datasets/vlm/VTRB-Suturing/annotated/20260330_kx/videos/chunk-000/laparoscope_camera/episode_000031.mp4",
     "video_start": 89.2,
     "video_end": 91.1,
     "conversations": [
