@@ -165,6 +165,8 @@ def compute_surgical_vqa_metrics(
         "retry_successful": "retry_detection",
         "total_phases": "procedural_ordering",
         "phases_remaining": "procedural_ordering",
+        "failures": "success_failure",
+        "failed_phase": "success_failure",
     }
 
     def _key_match(pred_val, ref_val, key_name: str) -> bool:
