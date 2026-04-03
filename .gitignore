@@ -172,3 +172,4 @@ testing.ipynb
 
 test_data/
 vqa_data/
+surgical_vqa_data/*_train.json
