@@ -30,6 +30,7 @@ EVAL_PATH="surgical_vqa_data/vrtb_suturing_val.json"
 IMAGE_FOLDER="vqa_data/images"  # for COCO images
 
 export PYTHONPATH=src:$PYTHONPATH
+export FORCE_QWENVL_VIDEO_READER=decord
 
 # ── Step 1: Mix datasets ─────────────────────────────────────────────────────
 echo "=== Mixing datasets (VRTB=${VRTB_RATIO}, COCO=${COCO_RATIO}, Cholec80=${CHOLEC_RATIO}) ==="

@@ -160,37 +160,92 @@ def get_image_info(image_path, min_pixel, max_pixel, width, height, image_patch_
 
     return image_input[0]
 
+def _extract_frames_pyav(video_path, target_fps, video_start=None, video_end=None):
+    """Extract frames using PyAV — handles AV1 and other codecs reliably."""
+    import av
+    from PIL import Image
+
+    container = av.open(video_path)
+    stream = container.streams.video[0]
+    src_fps = float(stream.average_rate)
+    total_frames = stream.frames or 0
+    duration = float(stream.duration * stream.time_base) if stream.duration else 0
+
+    # Determine time range
+    start_sec = video_start if video_start is not None else 0.0
+    end_sec = video_end if video_end is not None else duration
+    if end_sec <= 0:
+        end_sec = duration
+
+    # Seek to start
+    if start_sec > 0:
+        container.seek(int(start_sec * av.time_base), any_frame=False)
+
+    # Calculate target frame count
+    clip_duration = max(end_sec - start_sec, 0.1)
+    if target_fps and target_fps > 0:
+        n_target = max(1, int(clip_duration * target_fps))
+    else:
+        n_target = max(1, int(clip_duration * src_fps))
+
+    # Decode all frames in range, then subsample
+    frames = []
+    for frame in container.decode(video=0):
+        t = float(frame.pts * stream.time_base) if frame.pts is not None else 0
+        if t < start_sec:
+            continue
+        if t > end_sec:
+            break
+        frames.append(frame.to_image())
+
+    container.close()
+
+    if not frames:
+        raise RuntimeError(f"No frames decoded from {video_path} [{start_sec:.1f}s-{end_sec:.1f}s]")
+
+    # Subsample to target count
+    if len(frames) > n_target:
+        indices = [int(i * len(frames) / n_target) for i in range(n_target)]
+        frames = [frames[i] for i in indices]
+
+    return frames
+
+
 def get_video_info(video_path, min_pixels, max_pixels, width, height, fps, image_patch_size, return_video_metadata=False, video_start=None, video_end=None):
-    # Using this because of process_vision_info function
-    # Need to fix this in the future
+    # For videos with temporal clipping (video_start/video_end), use PyAV extraction
+    # to handle AV1 and other codecs that decord/torchvision struggle with.
+    # For full videos without clipping, use the standard path.
+    use_pyav_extraction = (video_start is not None or video_end is not None)
+
     content = {
         "type": "video",
-        "video": video_path,
         "min_pixels": min_pixels,
         "max_pixels": max_pixels,
         "fps": fps
     }
 
-    if video_start is not None:
-        content["video_start"] = video_start
-    if video_end is not None:
-        content["video_end"] = video_end
+    if use_pyav_extraction:
+        # Extract frames with PyAV, pass as list of PIL images
+        frames = _extract_frames_pyav(video_path, fps, video_start, video_end)
+        content["video"] = frames
+    else:
+        content["video"] = video_path
 
     if width is not None and height is not None:
         content["resized_width"] = width
         content["resized_height"] = height
-    
+
     messages = [
         {
-            "role": "user", 
+            "role": "user",
             "content": [content]
         }
     ]
 
     _, video_input, video_kwargs = process_vision_info(
-        messages, 
-        return_video_kwargs=True, 
-        image_patch_size=image_patch_size, 
+        messages,
+        return_video_kwargs=True,
+        image_patch_size=image_patch_size,
         return_video_metadata=return_video_metadata
     )
 
