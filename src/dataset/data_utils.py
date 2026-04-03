@@ -160,16 +160,21 @@ def get_image_info(image_path, min_pixel, max_pixel, width, height, image_patch_
 
     return image_input[0]
 
-def get_video_info(video_path, min_pixels, max_pixels, width, height, fps, image_patch_size, return_video_metadata=False):
+def get_video_info(video_path, min_pixels, max_pixels, width, height, fps, image_patch_size, return_video_metadata=False, video_start=None, video_end=None):
     # Using this because of process_vision_info function
     # Need to fix this in the future
     content = {
-        "type": "video", 
+        "type": "video",
         "video": video_path,
         "min_pixels": min_pixels,
         "max_pixels": max_pixels,
         "fps": fps
     }
+
+    if video_start is not None:
+        content["video_start"] = video_start
+    if video_end is not None:
+        content["video_end"] = video_end
 
     if width is not None and height is not None:
         content["resized_width"] = width

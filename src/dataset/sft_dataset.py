@@ -123,19 +123,25 @@ class SupervisedDataset(Dataset):
                 video_files = [video_files]
 
             videos = []
+            # Support per-sample video_start/video_end for temporal clipping
+            video_start = sources.get("video_start", None)
+            video_end = sources.get("video_end", None)
+
             for video_file in video_files:
                 if not os.path.exists(video_file):
                     if not video_file.startswith("http"):
                         video_file = os.path.join(video_folder, video_file)
                 video_input, video_kwargs = get_video_info(
-                    video_file, 
-                    self.video_min_pixel, 
-                    self.video_max_pixel, 
-                    self.video_resized_w, 
-                    self.video_resized_h, 
+                    video_file,
+                    self.video_min_pixel,
+                    self.video_max_pixel,
+                    self.video_resized_w,
+                    self.video_resized_h,
                     self.data_args.fps,
                     self.image_patch_size,
-                    return_video_metadata=self.return_video_metadata
+                    return_video_metadata=self.return_video_metadata,
+                    video_start=video_start,
+                    video_end=video_end,
                 )
                 videos.append(video_input)
         else:
