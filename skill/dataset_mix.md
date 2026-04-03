@@ -1,0 +1,5 @@
+coco generic vqa dataset (already vqa)
+/home/ubuntu/datasets/vlm/Cholec80-VQA (already vqa)
+/home/ubuntu/datasets/vlm/Cholec80-VQA-Planning (need clip generation)
+/home/ubuntu/datasets/vlm/JIGSAWS (already has a clip avi, use many skill annotation) 
+/home/ubuntu/datasets/vlm/SurgicalGPT-Cholec80-VQA (already vqa)
