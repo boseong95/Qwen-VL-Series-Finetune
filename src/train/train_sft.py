@@ -1,5 +1,6 @@
 import os
 import torch
+from collections import Counter
 from peft import LoraConfig, get_peft_model
 import ast
 from transformers import (
@@ -13,6 +14,33 @@ from dataset import make_supervised_data_module
 from params import DataArguments, ModelArguments, TrainingArguments
 from train.train_utils import get_peft_state_maybe_zero_3, get_peft_state_non_lora_maybe_zero_3, safe_save_model_for_hf_trainer
 import pathlib
+
+
+def compute_vqa_metrics(eval_pred) -> dict:
+    predictions = eval_pred.predictions  # List[str]
+    references = eval_pred.references    # List[str]
+
+    def _token_f1(pred: str, ref: str) -> float:
+        pred_tokens = pred.lower().split()
+        ref_tokens = ref.lower().split()
+        if not pred_tokens or not ref_tokens:
+            return 0.0
+        common = Counter(pred_tokens) & Counter(ref_tokens)
+        num_common = sum(common.values())
+        if num_common == 0:
+            return 0.0
+        precision = num_common / len(pred_tokens)
+        recall = num_common / len(ref_tokens)
+        return 2 * precision * recall / (precision + recall)
+
+    f1_scores = [_token_f1(p, r) for p, r in zip(predictions, references)]
+    em_scores = [float(p.strip().lower() == r.strip().lower()) for p, r in zip(predictions, references)]
+    n = max(len(f1_scores), 1)
+
+    return {
+        "token_f1": sum(f1_scores) / n,
+        "exact_match": sum(em_scores) / n,
+    }
 
 local_rank = None
 
@@ -222,6 +250,7 @@ def train():
         model=model,
         processing_class=processor,
         args=training_args,
+        compute_metrics=compute_vqa_metrics,
         **data_module
     )
 

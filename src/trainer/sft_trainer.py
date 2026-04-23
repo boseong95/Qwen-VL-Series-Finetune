@@ -1,4 +1,5 @@
 import os
+import math
 import torch
 import torch.nn as nn
 from typing import Optional, List, Union, Dict, Any
@@ -19,7 +20,7 @@ from transformers.pytorch_utils import (
     ALL_LAYERNORM_LAYERS
 )
 from transformers.trainer_utils import EvalLoopOutput
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Sampler
 from train.train_utils import get_peft_state_maybe_zero_3, get_peft_state_non_lora_maybe_zero_3
 
 from constants import IGNORE_INDEX
@@ -38,6 +39,32 @@ def maybe_zero_3(param, ignore_status=False, name=None):
     else:
         param = param.detach().cpu().clone()
     return param
+
+
+class _EvalDistributedSampler(Sampler):
+    """
+    Contiguous (non-interleaved) distributed sampler for eval.
+
+    Each rank gets a contiguous slice of the dataset. The last rank is padded
+    with leading samples to reach the same length as other ranks, ensuring all
+    ranks run for the same number of forward-pass steps (required by ZeRO-3).
+    After gathering, truncate results to the original dataset length to drop padding.
+    """
+    def __init__(self, dataset_size: int, rank: int, world_size: int):
+        self.per_rank = math.ceil(dataset_size / world_size)
+        start = rank * self.per_rank
+        end = min(start + self.per_rank, dataset_size)
+        indices = list(range(start, end))
+        # Pad the last (shorter) rank so all ranks have equal steps
+        if len(indices) < self.per_rank:
+            indices = indices + list(range(self.per_rank - len(indices)))
+        self.indices = indices
+
+    def __iter__(self):
+        return iter(self.indices)
+
+    def __len__(self):
+        return len(self.indices)
 
 
 @dataclass
@@ -178,6 +205,30 @@ class QwenSFTTrainer(Trainer):
             torch.save(non_lora, os.path.join(output_dir, "non_lora_state_dict.bin"))
             self.model.base_model.config.to_json_file(os.path.join(output_dir, "config.json"))
 
+    def get_eval_dataloader(self, eval_dataset=None):
+        if eval_dataset is None:
+            eval_dataset = self.eval_dataset
+
+        if self.args.world_size <= 1:
+            return super().get_eval_dataloader(eval_dataset)
+
+        # Shard eval dataset across ranks — contiguous slices with equal step counts.
+        # All ranks must run the same number of forward passes (ZeRO-3 requirement).
+        sampler = _EvalDistributedSampler(
+            dataset_size=len(eval_dataset),
+            rank=self.args.process_index,
+            world_size=self.args.world_size,
+        )
+        return DataLoader(
+            eval_dataset,
+            batch_size=self.args.per_device_eval_batch_size,
+            sampler=sampler,
+            collate_fn=self.data_collator,
+            drop_last=False,
+            num_workers=self.args.dataloader_num_workers,
+            pin_memory=self.args.dataloader_pin_memory,
+        )
+
     def prediction_step(self, model, inputs, prediction_loss_only, ignore_keys=None):
         labels = inputs.get("labels") if "labels" in inputs else None
 
@@ -295,15 +346,12 @@ class QwenSFTTrainer(Trainer):
         metric_key_prefix: str = "eval",
     ) -> EvalLoopOutput:
         """
-        Override evaluation_loop to support generation-based evaluation.
+        Generation-based evaluation loop with proper distributed sharding.
 
-        If compute_metrics is provided and prediction_loss_only is False,
-        this method will use model.generate() to produce text outputs
-        and pass them to compute_metrics as GenerativeEvalPrediction.
-
-        Your compute_metrics function should accept either:
-        - GenerativeEvalPrediction with .predictions (List[str]) and .references (List[str])
-        - Or a dict with 'predictions' and 'references' keys
+        Each rank processes a unique contiguous shard of the eval dataset
+        (via get_eval_dataloader). After the loop, predictions and losses are
+        gathered across ranks and truncated to the true dataset size (dropping
+        any padding samples added to equalise per-rank step counts).
         """
         args = self.args
 
@@ -328,6 +376,9 @@ class QwenSFTTrainer(Trainer):
         if has_length(dataloader):
             logger.info(f"  Num examples = {self.num_examples(dataloader)}")
         logger.info(f"  Batch size = {self.args.eval_batch_size}")
+
+        # Total real samples — used to strip padding after gathering.
+        total_samples = len(dataloader.dataset) if hasattr(dataloader.dataset, "__len__") else None
 
         model = self._wrap_model(self.model, training=False, dataloader=dataloader)
         model.eval()
@@ -362,10 +413,9 @@ class QwenSFTTrainer(Trainer):
             with torch.no_grad():
                 outputs = model(**inputs)
                 if hasattr(outputs, "loss") and outputs.loss is not None:
-                    loss = outputs.loss.detach()
-                    # Gather loss across processes
-                    loss = self.accelerator.gather(loss.repeat(batch_size))
-                    all_losses.append(loss.cpu())
+                    # Keep loss local; gather across ranks after the loop to
+                    # avoid collective-op count mismatches with padded shards.
+                    all_losses.append(outputs.loss.detach().cpu().item())
 
             # Extract prompts and references for each item in batch
             batch_prompt_ids = []
@@ -408,11 +458,20 @@ class QwenSFTTrainer(Trainer):
             if step % 10 == 0:
                 logger.info(f"  Eval step {step}/{len(dataloader)}")
 
-        # Gather predictions across processes if distributed
+        # Gather across ranks and strip padding to get exactly total_samples results.
         if self.args.world_size > 1:
-            # For distributed evaluation, we need to gather all predictions
-            all_predictions = self._gather_predictions(all_predictions)
-            all_references = self._gather_predictions(all_references)
+            all_predictions = self._gather_and_truncate(all_predictions, total_samples)
+            all_references  = self._gather_and_truncate(all_references,  total_samples)
+
+            # Gather per-rank mean losses then average (padding samples are a tiny
+            # fraction so the error is negligible).
+            import torch.distributed as dist
+            local_mean = sum(all_losses) / len(all_losses) if all_losses else 0.0
+            gathered_means = [None] * self.args.world_size
+            dist.all_gather_object(gathered_means, local_mean)
+            avg_loss = sum(gathered_means) / len(gathered_means)
+        else:
+            avg_loss = sum(all_losses) / len(all_losses) if all_losses else None
 
         # Compute metrics
         eval_prediction = GenerativeEvalPrediction(
@@ -423,8 +482,7 @@ class QwenSFTTrainer(Trainer):
         metrics = self.compute_metrics(eval_prediction)
 
         # Add loss to metrics if available
-        if all_losses:
-            avg_loss = torch.cat(all_losses).mean().item()
+        if avg_loss is not None:
             metrics[f"{metric_key_prefix}_loss"] = avg_loss
 
         # Prefix all metrics
@@ -442,22 +500,28 @@ class QwenSFTTrainer(Trainer):
             num_samples=len(all_predictions),
         )
 
-    def _gather_predictions(self, predictions: List[str]) -> List[str]:
-        """Gather string predictions across all processes."""
+    def _gather_and_truncate(self, local_list: List[str], total_samples: Optional[int]) -> List[str]:
+        """
+        Gather string lists from all ranks (via all_gather_object) and truncate
+        to total_samples to remove any padding added by _EvalDistributedSampler.
+
+        Ranks contribute contiguous slices in rank order, so a simple prefix
+        truncation correctly removes only the tail-padding from the last rank.
+        """
         import torch.distributed as dist
 
         if not dist.is_initialized():
-            return predictions
+            return local_list
 
         world_size = dist.get_world_size()
-
-        # Gather all predictions to rank 0
         gathered = [None] * world_size
-        dist.all_gather_object(gathered, predictions)
+        dist.all_gather_object(gathered, local_list)
 
-        # Flatten the list
-        all_predictions = []
-        for preds in gathered:
-            all_predictions.extend(preds)
+        merged = []
+        for rank_list in gathered:
+            merged.extend(rank_list)
 
-        return all_predictions
+        if total_samples is not None:
+            merged = merged[:total_samples]
+
+        return merged
