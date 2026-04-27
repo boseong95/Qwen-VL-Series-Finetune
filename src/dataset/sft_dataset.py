@@ -1,5 +1,7 @@
 import copy
+import logging
 import os
+import random
 from typing import Dict
 import torch
 import transformers
@@ -365,15 +367,65 @@ class DataCollatorForSupervisedDataset(object):
 
         return data_dict
 
+def _has_valid_image(rec: dict) -> bool:
+    img = rec.get("image")
+    if img is None:
+        return True  # text-only sample, no image required
+    if isinstance(img, list):
+        return all(img_p is not None and os.path.exists(str(img_p)) for img_p in img)
+    return os.path.exists(str(img))
+
+
+def _load_data_mixture(data_path: str) -> "str | list":
+    """Parse 'path1.json%50,path2.json%100' into a sampled, concatenated list.
+
+    Ratio N means "use N% of the dataset". A single path with no '%' or ',' is
+    returned as-is so the fast path in SupervisedDataset.__init__ still applies.
+    """
+    if "," not in data_path and "%" not in data_path:
+        return data_path
+
+    combined = []
+    for part in (p.strip() for p in data_path.split(",") if p.strip()):
+        if "%" in part:
+            path, ratio_str = part.rsplit("%", 1)
+            ratio = int(ratio_str) / 100.0
+        else:
+            path, ratio = part, 1.0
+
+        if path.endswith(".jsonl"):
+            with open(path, "r") as f:
+                data = [json.loads(line) for line in f if line.strip()]
+        else:
+            data = json.load(open(path, "r"))
+        # Drop records with missing/None image paths before sampling
+        n_before = len(data)
+        data = [r for r in data if _has_valid_image(r)]
+        if len(data) < n_before:
+            logging.warning(f"[data mixture] {path}: dropped {n_before - len(data)} records with missing images")
+
+        k = max(1, int(len(data) * ratio))
+        if ratio < 1.0:
+            data = random.sample(data, k)
+        elif ratio > 1.0:
+            data = random.choices(data, k=k)  # with replacement
+
+        logging.info(f"[data mixture] {path}: {k} samples (ratio={ratio:.0%}, src={len(data) if ratio <= 1.0 else int(k/ratio)})")
+        combined.extend(data)
+
+    logging.info(f"[data mixture] total: {len(combined)} samples")
+    return combined
+
+
 def make_supervised_data_module(model_id, processor, data_args):
     """Make dataset and collator for supervised fine-tuning."""
     sft_dataset = SupervisedDataset(
-        data_path=data_args.data_path, processor=processor, data_args=data_args, model_id=model_id
+        data_path=_load_data_mixture(data_args.data_path), processor=processor, data_args=data_args, model_id=model_id
     )
     eval_dataset = None
     if data_args.eval_path is not None:
         eval_dataset = SupervisedDataset(
-              data_path=data_args.eval_path,
+              data_path=_load_data_mixture(data_args.eval_path),
               processor=processor,
               data_args=data_args,
               model_id=model_id
