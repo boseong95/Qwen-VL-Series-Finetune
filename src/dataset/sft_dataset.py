@@ -44,7 +44,11 @@ class SupervisedDataset(Dataset):
     ):
         super(SupervisedDataset, self).__init__()
         if isinstance(data_path, str):
-            list_data_dict = json.load(open(data_path, "r"))
+            if data_path.endswith(".jsonl"):
+                with open(data_path, "r") as f:
+                    list_data_dict = [json.loads(line) for line in f if line.strip()]
+            else:
+                list_data_dict = json.load(open(data_path, "r"))
         else:
             list_data_dict = data_path
 
